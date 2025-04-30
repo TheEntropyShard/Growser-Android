@@ -19,6 +19,7 @@
 package me.theentropyshard.growser.ui.gemini
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +28,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -209,7 +211,7 @@ fun GemtextPreformatted(
         modifier = modifier
             .clip(RoundedCornerShape(6.dp))
             .background(MaterialTheme.colorScheme.secondaryContainer)
-            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
     ) {
         Column {
             if (!caption.isNullOrEmpty()) {
@@ -218,7 +220,7 @@ fun GemtextPreformatted(
                         .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp))
                         .background(MaterialTheme.colorScheme.surfaceVariant)
                         .fillMaxWidth()
-                        .padding(start = 6.dp)
+                        .padding(horizontal = 6.dp)
                 ) {
                     Text(
                         text = caption,
@@ -229,7 +231,7 @@ fun GemtextPreformatted(
             }
 
             Text(
-                modifier = Modifier.padding(start = 6.dp),
+                modifier = Modifier.padding(horizontal = 6.dp),
                 text = if (text.endsWith("\n")) text.dropLast(1) else text,
                 fontFamily = jetbrainsMonoFamily,
                 fontWeight = FontWeight.Normal
