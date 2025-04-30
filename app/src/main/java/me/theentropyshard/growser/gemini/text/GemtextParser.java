@@ -118,6 +118,10 @@ public class GemtextParser {
             }
         }
 
+        if (listElement != null) {
+            elements.add(listElement);
+        }
+
         return new GemtextPage(title, elements);
     }
 }
