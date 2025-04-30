@@ -55,9 +55,9 @@ val Typography = Typography(
 )
 
 val jetbrainsMonoFamily = FontFamily(
-    Font(R.font.jetbrainsmono_light, FontWeight.Light),
-    Font(R.font.jetbrainsmono_regular, FontWeight.Normal),
-    Font(R.font.jetbrainsmono_italic, FontWeight.Normal, FontStyle.Italic),
-    Font(R.font.jetbrainsmono_medium, FontWeight.Medium),
-    Font(R.font.jetbrainsmono_bold, FontWeight.Bold)
+    Font(R.font.jetbrainsmononl_light, FontWeight.Light),
+    Font(R.font.jetbrainsmononl_regular, FontWeight.Normal),
+    Font(R.font.jetbrainsmononl_italic, FontWeight.Normal, FontStyle.Italic),
+    Font(R.font.jetbrainsmononl_medium, FontWeight.Medium),
+    Font(R.font.jetbrainsmononl_bold, FontWeight.Bold)
 )
