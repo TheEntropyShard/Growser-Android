@@ -49,6 +49,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import me.theentropyshard.growser.ui.components.GrowserTopBar
+import me.theentropyshard.growser.ui.gemini.ExceptionView
 import me.theentropyshard.growser.ui.gemini.GemtextView
 import me.theentropyshard.growser.ui.gemini.PermanentFailure
 import me.theentropyshard.growser.ui.gemini.TemporaryFailure
@@ -62,6 +63,9 @@ fun Growser() {
     val keyboardController = LocalSoftwareKeyboardController.current
 
     val mainViewModel: MainViewModel = viewModel()
+
+    val exception by mainViewModel.exception.collectAsState()
+
     val pageState by mainViewModel.pageState.collectAsState()
     val currentUrl by mainViewModel.currentUrl.collectAsState()
     val page by mainViewModel.document.collectAsState()
@@ -161,35 +165,43 @@ fun Growser() {
                                         .padding(8.dp)
                                         .verticalScroll(scrollState)
                                 ) {
-                                    if (digit == 2) {
-                                        GemtextView(
-                                            elements = page.elements,
-                                            scrollState = scrollState,
-                                            onUrlClick = {
-                                                if (it.startsWith("gemini://")) {
-                                                    mainViewModel.loadPage(it)
-                                                } else {
-                                                    mainViewModel.loadRelativePage(it)
-                                                }
-                                            }
+                                    if (exception.isNotEmpty()) {
+                                        ExceptionView(
+                                            message = "Could not fetch $currentUrl",
+                                            stacktrace = exception
                                         )
                                     } else {
-                                        when (digit) {
-                                            4 -> {
-                                                TemporaryFailure(
-                                                    statusCode = statusCode,
-                                                    statusLine = statusLine
-                                                )
-                                            }
+                                        if (digit == 2) {
+                                            GemtextView(
+                                                elements = page.elements,
+                                                scrollState = scrollState,
+                                                onUrlClick = {
+                                                    if (it.startsWith("gemini://")) {
+                                                        mainViewModel.loadPage(it)
+                                                    } else {
+                                                        mainViewModel.loadRelativePage(it)
+                                                    }
+                                                }
+                                            )
+                                        } else {
+                                            when (digit) {
+                                                4 -> {
+                                                    TemporaryFailure(
+                                                        statusCode = statusCode,
+                                                        statusLine = statusLine
+                                                    )
+                                                }
 
-                                            5 -> {
-                                                PermanentFailure(
-                                                    statusCode = statusCode,
-                                                    statusLine = statusLine
-                                                )
+                                                5 -> {
+                                                    PermanentFailure(
+                                                        statusCode = statusCode,
+                                                        statusLine = statusLine
+                                                    )
+                                                }
                                             }
                                         }
                                     }
+
                                 }
                             }
                         }

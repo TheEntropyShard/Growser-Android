@@ -19,28 +19,35 @@
 package me.theentropyshard.growser.ui.gemini
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import me.theentropyshard.growser.ui.theme.jetbrainsMonoFamily
 
 @Composable
-fun ErrorMessage(
+fun ErrorView(
     modifier: Modifier = Modifier,
-    headerText: String,
-    statusCode: Int,
-    statusCodeDetail: String = "",
-    statusLine: String,
+    headingText: String,
+    mainText: String,
+    fontFamily: FontFamily = jetbrainsMonoFamily,
+    textAlign: TextAlign = TextAlign.Justify,
+    fontWeight: FontWeight = FontWeight.Normal,
+    horizontalScroll: Boolean = false
 ) {
     Box(
         modifier = modifier
@@ -56,19 +63,51 @@ fun ErrorMessage(
                     .fillMaxWidth()
                     .padding(horizontal = 6.dp)
             ) {
-                Text(text = headerText)
+                Text(text = headingText)
             }
 
             Text(
-                modifier = Modifier.padding(horizontal = 6.dp),
-                text = "Status code: $statusCode$statusCodeDetail\nError message: $statusLine",
+                modifier = Modifier.padding(horizontal = 6.dp).then(
+                    if (horizontalScroll) Modifier.horizontalScroll(rememberScrollState()) else Modifier
+                ),
+                text = mainText,
                 color = MaterialTheme.colorScheme.onError,
-                textAlign = TextAlign.Justify,
-                fontFamily = jetbrainsMonoFamily,
-                fontWeight = FontWeight.Normal
+                textAlign = textAlign,
+                fontFamily = fontFamily,
+                fontWeight = fontWeight
             )
         }
     }
+}
+
+@Composable
+fun ExceptionView(
+    modifier: Modifier = Modifier,
+    message: String,
+    stacktrace: String
+) {
+    ErrorView(
+        modifier = modifier,
+        headingText = message,
+        mainText = stacktrace,
+        textAlign = TextAlign.Start,
+        horizontalScroll = true
+    )
+}
+
+@Composable
+fun GeminiError(
+    modifier: Modifier = Modifier,
+    headerText: String,
+    statusCode: Int,
+    statusCodeDetail: String = "",
+    statusLine: String,
+) {
+    ErrorView(
+        modifier = modifier,
+        headingText = headerText,
+        mainText = "Status code: $statusCode$statusCodeDetail\nError message: $statusLine"
+    )
 }
 
 @Composable
@@ -85,7 +124,7 @@ fun TemporaryFailure(
         else -> ""
     }
 
-    ErrorMessage(
+    GeminiError(
         modifier = modifier,
         headerText = "Temporary failure. The server cannot process the request at the moment." +
                 " Please try again later.",
@@ -109,7 +148,7 @@ fun PermanentFailure(
         else -> ""
     }
 
-    ErrorMessage(
+    GeminiError(
         modifier = modifier,
         headerText = "Permanent failure. The server cannot process this request.",
         statusCode = statusCode,

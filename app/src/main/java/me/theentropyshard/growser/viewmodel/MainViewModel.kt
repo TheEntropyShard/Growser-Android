@@ -19,6 +19,7 @@
 package me.theentropyshard.growser.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -29,6 +30,9 @@ import me.theentropyshard.growser.History
 import me.theentropyshard.growser.gemini.GeminiFetch
 import me.theentropyshard.growser.gemini.text.GemtextParser
 import me.theentropyshard.growser.gemini.text.document.GemtextPage
+import java.io.PrintStream
+import java.io.PrintWriter
+import java.io.StringWriter
 
 enum class PageState {
     NotReady, Loading, Ready
@@ -49,6 +53,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private var _statusLine = MutableStateFlow("")
     val statusLine = _statusLine.asStateFlow()
+
+    private var _exception = MutableStateFlow("")
+    val exception = _exception.asStateFlow()
 
     private val history = History()
 
@@ -76,16 +83,27 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _pageState.value = PageState.Loading
 
         viewModelScope.launch(Dispatchers.IO) {
-            GeminiFetch.fetchWebPage(theUrl).use { response ->
-                _statusCode.value = response.statusCode
-                _statusLine.value = response.metaInfo
+            try {
+                GeminiFetch.fetchWebPage(theUrl).use { response ->
+                    _exception.value = ""
 
-                val text = response.readToString()
-                val page = GemtextParser().parse(text)
+                    _statusCode.value = response.statusCode
+                    _statusLine.value = response.metaInfo
 
+                    val text = response.readToString()
+                    val page = GemtextParser().parse(text)
+
+                    _pageState.value = PageState.Ready
+
+                    _document.value = page
+                }
+            } catch (e: Exception) {
                 _pageState.value = PageState.Ready
-
-                _document.value = page
+                Log.e("MainViewModel", "Could not fetch $url", e)
+                val writer = StringWriter()
+                val stream = PrintWriter(writer)
+                e.printStackTrace(stream)
+                _exception.value = writer.toString()
             }
         }
     }
@@ -93,10 +111,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun loadRelativePage(url: String) {
         var theUrl = url
 
-        if (_currentUrl.value.endsWith("/") && url.startsWith("/")) {
-            theUrl = "${_currentUrl.value}${url.drop(1)}"
+        theUrl = if (_currentUrl.value.endsWith("/") && url.startsWith("/")) {
+            "${_currentUrl.value}${url.drop(1)}"
         } else {
-            theUrl = "${_currentUrl.value}$theUrl"
+            "${_currentUrl.value}$theUrl"
         }
 
         this.loadPage(theUrl)
