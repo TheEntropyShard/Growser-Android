@@ -18,7 +18,7 @@
 
 package me.theentropyshard.growser.gemini.text.document;
 
-public class GemtextH2Element extends GemtextTextElement {
+public class GemtextH2Element extends GemtextHeaderElement {
     public GemtextH2Element(String text) {
         super(Type.H2, text);
     }

@@ -18,8 +18,8 @@
 
 package me.theentropyshard.growser.gemini.text.document;
 
-public class GemtextH1Element extends GemtextHeaderElement {
-    public GemtextH1Element(String text) {
-        super(Type.H1, text);
+public abstract class GemtextHeaderElement extends GemtextTextElement {
+    public GemtextHeaderElement(Type type, String text) {
+        super(type, text);
     }
 }

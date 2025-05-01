@@ -26,18 +26,25 @@ import androidx.compose.material.icons.filled.FormatPaint
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import kotlinx.coroutines.launch
+import me.theentropyshard.growser.LocalSettingsRepository
+import me.theentropyshard.growser.settings.SettingsRepository
 
 @Composable
 fun AppearanceSettingsScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController
 ) {
+    val settings = LocalSettingsRepository.current
+
     Column(modifier = modifier.fillMaxSize()) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             var checked by remember { mutableStateOf(false) }
@@ -55,5 +62,22 @@ fun AppearanceSettingsScreen(
                 }
             )
         }
+
+        val scope = rememberCoroutineScope()
+        val showTableOfContents by settings.showTableOfContents.collectAsState(false)
+
+        SettingsItem(
+            text = "Show table of contents",
+            trailingContent = {
+                Switch(
+                    checked = showTableOfContents,
+                    onCheckedChange = {
+                        scope.launch {
+                            settings.saveShowTableOfContents(it)
+                        }
+                    }
+                )
+            }
+        )
     }
 }

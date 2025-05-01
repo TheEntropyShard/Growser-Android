@@ -18,7 +18,8 @@
 
 package me.theentropyshard.growser.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +34,7 @@ enum class PageState {
     NotReady, Loading, Ready
 }
 
-class MainViewModel : ViewModel() {
+class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var _pageState = MutableStateFlow(PageState.NotReady)
     val pageState = _pageState.asStateFlow()
 

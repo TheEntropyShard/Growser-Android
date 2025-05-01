@@ -18,35 +18,21 @@
 
 package me.theentropyshard.growser.ui.gemini
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.layout.positionInRoot
-import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
+import me.theentropyshard.growser.LocalSettingsRepository
 import me.theentropyshard.growser.gemini.text.document.GemtextBlockquoteElement
 import me.theentropyshard.growser.gemini.text.document.GemtextElement
 import me.theentropyshard.growser.gemini.text.document.GemtextH1Element
-import me.theentropyshard.growser.gemini.text.document.GemtextH2Element
-import me.theentropyshard.growser.gemini.text.document.GemtextH3Element
+import me.theentropyshard.growser.gemini.text.document.GemtextHeaderElement
 import me.theentropyshard.growser.gemini.text.document.GemtextLinkElement
 import me.theentropyshard.growser.gemini.text.document.GemtextListElement
 import me.theentropyshard.growser.gemini.text.document.GemtextPreformattedElement
@@ -61,12 +47,17 @@ fun GemtextView(
     onUrlClick: (String) -> Unit = {}
 ) {
     val offsets = remember { mutableStateMapOf<Int, Int>() }
+    val settings = LocalSettingsRepository.current
 
-    TableOfContents(
-        elements = elements,
-        scrollState = scrollState,
-        offsets = offsets
-    )
+    val showTableOfContents by settings.showTableOfContents.collectAsState(false)
+
+    if (showTableOfContents) {
+        TableOfContents(
+            elements = elements,
+            scrollState = scrollState,
+            offsets = offsets
+        )
+    }
 
     for (element in elements) {
         when (element.type) {
@@ -88,21 +79,17 @@ fun GemtextView(
                 GemtextList(items = (element as GemtextListElement).elements)
             }
 
-            GemtextElement.Type.H1 -> {
-                GemtextH1(
+            GemtextElement.Type.H1, GemtextElement.Type.H2, GemtextElement.Type.H3 -> {
+                val header = (element as GemtextHeaderElement)
+
+                GemtextHeader(
                     modifier = Modifier.onGloballyPositioned {
-                        offsets[elements.indexOf(element)] = it.positionInRoot().y.roundToInt()
+                        offsets[elements.indexOf(element)] = it.positionInParent().y.roundToInt()
                     },
-                    text = (element as GemtextH1Element).text
+                    text = header.text,
+                    fontWeight = header.getFontWeight(),
+                    fontSize = header.getFontSize()
                 )
-            }
-
-            GemtextElement.Type.H2 -> {
-                GemtextH2(text = (element as GemtextH2Element).text)
-            }
-
-            GemtextElement.Type.H3 -> {
-                GemtextH3(text = (element as GemtextH3Element).text)
             }
 
             GemtextElement.Type.BLOCKQUOTE -> {
@@ -119,69 +106,6 @@ fun GemtextView(
             }
 
             null -> {}
-        }
-    }
-}
-
-@Composable
-fun TableOfContents(
-    modifier: Modifier = Modifier,
-    elements: List<GemtextElement>,
-    scrollState: ScrollState,
-    offsets: Map<Int, Int>
-) {
-    var expanded by rememberSaveable { mutableStateOf(false) }
-
-    val scope = rememberCoroutineScope()
-
-    Column {
-        Row(
-            modifier = Modifier.clickable { expanded = !expanded }
-        ) {
-            Icon(
-                modifier = Modifier.graphicsLayer {
-                    rotationZ = if (expanded) 90f else 0f
-                },
-                imageVector = Icons.Filled.ChevronRight,
-                contentDescription = ""
-            )
-
-            Text(text = "Table Of Contents")
-        }
-
-        AnimatedVisibility(visible = expanded) {
-            Column(modifier = Modifier.padding(start = 24.dp)) {
-                for (element in elements) {
-                    if (element is GemtextH1Element) {
-                        Text(
-                            modifier = Modifier.clickable {
-                                scope.launch {
-                                    offsets[elements.indexOf(element)]?.let {
-                                        scrollState.animateScrollTo(
-                                            it
-                                        )
-                                    }
-                                }
-                            },
-                            text = element.text
-                        )
-                    }
-
-                    if (element is GemtextH2Element) {
-                        Text(
-                            modifier = Modifier.padding(start = 16.dp),
-                            text = element.text
-                        )
-                    }
-
-                    if (element is GemtextH3Element) {
-                        Text(
-                            modifier = Modifier.padding(start = 32.dp),
-                            text = element.text
-                        )
-                    }
-                }
-            }
         }
     }
 }

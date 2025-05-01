@@ -16,10 +16,22 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.theentropyshard.growser.gemini.text.document;
+package me.theentropyshard.growser.settings
 
-public class GemtextH1Element extends GemtextHeaderElement {
-    public GemtextH1Element(String text) {
-        super(Type.H1, text);
+import android.content.Context
+import androidx.datastore.preferences.core.edit
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+
+class SettingsRepository(private val context: Context) {
+    val showTableOfContents: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            preferences[SettingsKeys.SHOW_TABLE_OF_CONTENTS] ?: false
+        }
+
+    suspend fun saveShowTableOfContents(show: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[SettingsKeys.SHOW_TABLE_OF_CONTENTS] = show
+        }
     }
 }

@@ -52,6 +52,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import me.theentropyshard.growser.gemini.text.document.GemtextH1Element
+import me.theentropyshard.growser.gemini.text.document.GemtextH2Element
+import me.theentropyshard.growser.gemini.text.document.GemtextH3Element
+import me.theentropyshard.growser.gemini.text.document.GemtextHeaderElement
 import me.theentropyshard.growser.ui.theme.jetbrainsMonoFamily
 
 @Composable
@@ -75,43 +79,24 @@ fun GemtextHeader(
     }
 }
 
-@Composable
-fun GemtextH1(
-    modifier: Modifier = Modifier,
-    text: String
-) {
-    GemtextHeader(
-        modifier = modifier,
-        text = text,
-        fontWeight = FontWeight.Bold,
-        fontSize = 24.sp
-    )
+fun GemtextHeaderElement.getFontWeight(): FontWeight {
+    return when (this) {
+        is GemtextH1Element -> FontWeight.Bold
+        is GemtextH2Element -> FontWeight.SemiBold
+        is GemtextH3Element -> FontWeight.SemiBold
+
+        else -> throw RuntimeException("Unsupported header: ${this.javaClass.name}")
+    }
 }
 
-@Composable
-fun GemtextH2(
-    modifier: Modifier = Modifier,
-    text: String
-) {
-    GemtextHeader(
-        modifier = modifier,
-        text = text,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 20.sp
-    )
-}
+fun GemtextHeaderElement.getFontSize(): TextUnit {
+    return when (this) {
+        is GemtextH1Element -> 24.sp
+        is GemtextH2Element -> 20.sp
+        is GemtextH3Element -> 18.sp
 
-@Composable
-fun GemtextH3(
-    modifier: Modifier = Modifier,
-    text: String
-) {
-    GemtextHeader(
-        modifier = modifier,
-        text = text,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 18.sp
-    )
+        else -> throw RuntimeException("Unsupported header: ${this.javaClass.name}")
+    }
 }
 
 @Composable

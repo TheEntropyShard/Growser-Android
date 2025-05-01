@@ -24,9 +24,16 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.toArgb
+import me.theentropyshard.growser.settings.SettingsRepository
 import me.theentropyshard.growser.ui.Growser
 import me.theentropyshard.growser.ui.theme.GrowserTheme
+
+val LocalSettingsRepository = compositionLocalOf<SettingsRepository> {
+    error("No settings repository provided")
+}
 
 class MainActivity : ComponentActivity() {
 
@@ -37,11 +44,17 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
+            val repository = SettingsRepository(applicationContext)
+
             GrowserTheme {
                 @Suppress("DEPRECATION")
                 window.navigationBarColor = MaterialTheme.colorScheme.background.toArgb()
 
-                Growser()
+                CompositionLocalProvider(
+                    LocalSettingsRepository provides repository
+                ) {
+                    Growser()
+                }
             }
         }
     }

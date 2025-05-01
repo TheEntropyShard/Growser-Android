@@ -16,10 +16,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.theentropyshard.growser.gemini.text.document;
+package me.theentropyshard.growser.settings
 
-public class GemtextH1Element extends GemtextHeaderElement {
-    public GemtextH1Element(String text) {
-        super(Type.H1, text);
-    }
-}
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
+
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
