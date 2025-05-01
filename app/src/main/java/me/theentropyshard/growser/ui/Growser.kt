@@ -164,7 +164,13 @@ fun Growser() {
                                     if (digit == 2) {
                                         GemtextView(
                                             elements = page.elements,
-                                            onUrlClick = { mainViewModel.loadRelativePage(it) }
+                                            onUrlClick = {
+                                                if (it.startsWith("gemini://")) {
+                                                    mainViewModel.loadPage(it)
+                                                } else {
+                                                    mainViewModel.loadRelativePage(it)
+                                                }
+                                            }
                                         )
                                     } else {
                                         when (digit) {
