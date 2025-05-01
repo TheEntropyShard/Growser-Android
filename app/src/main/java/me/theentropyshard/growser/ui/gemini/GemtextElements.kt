@@ -210,6 +210,7 @@ fun GemtextPreformatted(
 ) {
     Box(
         modifier = modifier
+            .fillMaxWidth()
             .clip(RoundedCornerShape(6.dp))
             .background(MaterialTheme.colorScheme.secondaryContainer)
             .horizontalScroll(rememberScrollState())
