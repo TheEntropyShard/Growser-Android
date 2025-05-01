@@ -158,8 +158,7 @@ fun Growser() {
                                         .weight(1f)
                                         .fillMaxWidth()
                                         .padding(8.dp)
-                                        .verticalScroll(rememberScrollState()),
-                                    horizontalAlignment = Alignment.CenterHorizontally
+                                        .verticalScroll(rememberScrollState())
                                 ) {
                                     if (digit == 2) {
                                         GemtextView(

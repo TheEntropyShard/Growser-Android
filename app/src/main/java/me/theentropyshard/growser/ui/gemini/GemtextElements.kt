@@ -68,6 +68,7 @@ fun GemtextHeader(
     ) {
         Text(
             text = text,
+            textAlign = TextAlign.Center,
             fontWeight = fontWeight,
             fontSize = fontSize
         )
