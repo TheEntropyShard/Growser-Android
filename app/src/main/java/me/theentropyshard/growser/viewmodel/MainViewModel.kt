@@ -60,9 +60,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val history = History()
 
     fun loadPreviousPage() {
-        history.pop()
-
-        this.loadPage(history.pop(), false)
+        this.loadPage(history.pop(this.currentUrl.value), false)
     }
 
     fun loadPage(url: String, addToHistory: Boolean = true) {

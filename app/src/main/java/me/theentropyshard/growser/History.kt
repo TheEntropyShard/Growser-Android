@@ -21,20 +21,20 @@ package me.theentropyshard.growser
 class History {
     private val urls: ArrayDeque<String> = ArrayDeque()
 
-    private var last: String = ""
-
     fun visit(url: String) {
         urls.add(url)
     }
 
-    fun pop(): String {
+    fun pop(currentUrl: String): String {
         if (urls.size == 0) {
-            return last
+            return currentUrl
         }
 
         val last = urls.removeLast()
 
-        this.last = last
+        if (last == currentUrl && urls.size > 0) {
+            return urls.removeLast()
+        }
 
         return last
     }
