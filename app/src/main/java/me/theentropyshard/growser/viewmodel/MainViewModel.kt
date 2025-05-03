@@ -33,6 +33,7 @@ import me.theentropyshard.growser.gemini.text.document.GemtextPage
 import java.io.PrintStream
 import java.io.PrintWriter
 import java.io.StringWriter
+import java.net.URI
 
 enum class PageState {
     NotReady, Loading, Ready
@@ -70,7 +71,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             theUrl = "gemini://$theUrl"
         }
 
-        if (!theUrl.endsWith("/")) {
+        val path = URI(theUrl).path
+
+        if (path == null || path.trim().isEmpty()) {
             theUrl = "$theUrl/"
         }
 
@@ -84,6 +87,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 GeminiFetch.fetchWebPage(theUrl).use { response ->
                     _exception.value = ""
+
+                    if (response.statusCode.toString().startsWith("3")) {
+                        var redirectUrl = response.metaInfo
+
+                        if (!redirectUrl.startsWith("gemini://")) {
+                            redirectUrl = "gemini://${URI(url).host}$redirectUrl"
+                        }
+
+                        loadPage(redirectUrl)
+
+                        return@launch
+                    }
 
                     _statusCode.value = response.statusCode
                     _statusLine.value = response.metaInfo

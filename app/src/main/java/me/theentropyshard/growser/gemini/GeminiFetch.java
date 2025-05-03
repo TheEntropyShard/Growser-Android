@@ -28,8 +28,6 @@ public class GeminiFetch {
     private static final GeminiClient CLIENT = new GeminiClient();
 
     public static GeminiResponse fetchWebPage(String url) throws IOException {
-        url = url.endsWith("/") ? url : url + "/";
-
         return GeminiFetch.CLIENT.send(new GeminiRequest(url));
     }
 }
