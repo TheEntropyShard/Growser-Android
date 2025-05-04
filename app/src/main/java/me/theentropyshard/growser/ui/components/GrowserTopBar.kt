@@ -103,7 +103,7 @@ fun GrowserTopBar(
             LinearProgressIndicator(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(3.dp)
+                    .height(2.dp)
                     .align(Alignment.BottomCenter)
             )
         }
@@ -111,7 +111,7 @@ fun GrowserTopBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 4.dp),
+                .padding(bottom = 3.dp, top = 3.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onHomeClick) {
