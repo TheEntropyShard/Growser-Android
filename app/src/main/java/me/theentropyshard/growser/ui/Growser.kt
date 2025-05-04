@@ -206,12 +206,10 @@ fun Growser() {
                                             }
                                         }
                                     }
-
                                 }
                             }
                         }
                     }
-
                 }
 
                 composable("settings") {

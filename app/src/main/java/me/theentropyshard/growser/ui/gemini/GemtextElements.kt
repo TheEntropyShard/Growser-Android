@@ -193,37 +193,36 @@ fun GemtextPreformatted(
     caption: String? = null,
     text: String
 ) {
-    Box(
+    Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(6.dp))
             .background(MaterialTheme.colorScheme.secondaryContainer)
-            .horizontalScroll(rememberScrollState())
     ) {
-        Column {
-            if (!caption.isNullOrEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .fillMaxWidth()
-                        .padding(horizontal = 6.dp)
-                ) {
-                    Text(
-                        text = caption,
-                        fontFamily = jetbrainsMonoFamily,
-                        fontWeight = FontWeight.Normal
-                    )
-                }
+        if (!caption.isNullOrEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .padding(horizontal = 6.dp)
+            ) {
+                Text(
+                    text = caption,
+                    fontFamily = jetbrainsMonoFamily,
+                    fontWeight = FontWeight.Normal
+                )
             }
-
-            Text(
-                modifier = Modifier.padding(horizontal = 6.dp),
-                text = if (text.endsWith("\n")) text.dropLast(1) else text,
-                fontFamily = jetbrainsMonoFamily,
-                fontWeight = FontWeight.Normal
-            )
         }
+
+        Text(
+            modifier = Modifier
+                .padding(horizontal = 6.dp)
+                .horizontalScroll(rememberScrollState()),
+            text = text,
+            fontFamily = jetbrainsMonoFamily,
+            fontWeight = FontWeight.Normal
+        )
     }
 }
 

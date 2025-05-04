@@ -101,7 +101,7 @@ fun GemtextView(
 
                 GemtextPreformatted(
                     caption = preformatted.caption,
-                    text = preformatted.text
+                    text = if (preformatted.text.endsWith("\n")) preformatted.text.dropLast(1) else preformatted.text
                 )
             }
 
