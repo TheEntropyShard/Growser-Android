@@ -36,6 +36,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -185,6 +186,10 @@ fun Growser() {
                                             )
                                         } else {
                                             when (digit) {
+                                                1 -> {
+                                                    Text(text = statusLine)
+                                                }
+
                                                 4 -> {
                                                     TemporaryFailure(
                                                         statusCode = statusCode,
