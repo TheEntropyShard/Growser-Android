@@ -180,7 +180,11 @@ fun Growser() {
                                                     if (it.startsWith("gemini://")) {
                                                         mainViewModel.loadPage(it)
                                                     } else {
-                                                        mainViewModel.loadRelativePage(it)
+                                                        if (it.startsWith("/")) {
+                                                            mainViewModel.loadRelativePageToHost(it)
+                                                        } else {
+                                                            mainViewModel.loadRelativePageToPath(it)
+                                                        }
                                                     }
                                                 }
                                             )

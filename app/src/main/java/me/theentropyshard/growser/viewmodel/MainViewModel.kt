@@ -19,6 +19,7 @@
 package me.theentropyshard.growser.viewmodel
 
 import android.app.Application
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -30,7 +31,6 @@ import me.theentropyshard.growser.History
 import me.theentropyshard.growser.gemini.GeminiFetch
 import me.theentropyshard.growser.gemini.text.GemtextParser
 import me.theentropyshard.growser.gemini.text.document.GemtextPage
-import java.io.PrintStream
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.net.URI
@@ -60,39 +60,40 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val history = History()
 
+    private var currUrl: String = ""
+
     fun loadPreviousPage() {
         this.loadPage(history.pop(this.currentUrl.value), false)
     }
 
     fun loadPage(url: String, addToHistory: Boolean = true) {
-        var theUrl = url
-
-        if (!url.startsWith("gemini://")) {
-            theUrl = "gemini://$theUrl"
+        currUrl = if (!url.startsWith("gemini://")) {
+            "gemini://$url"
+        } else {
+            url
         }
 
-        val path = URI(theUrl).path
+        val path = URI(currUrl).path
 
-        if (path == null || path.trim().isEmpty()) {
-            theUrl = "$theUrl/"
+        if (path == null || path.isEmpty()) {
+            currUrl = "$currUrl/"
         }
 
-        if (addToHistory) history.visit(theUrl)
-
-        _currentUrl.value = theUrl
+        if (addToHistory) history.visit(currUrl)
+        _currentUrl.value = currUrl
 
         _pageState.value = PageState.Loading
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                GeminiFetch.fetchWebPage(theUrl).use { response ->
+                GeminiFetch.fetchWebPage(currUrl).use { response ->
                     _exception.value = ""
 
                     if (response.statusCode.toString().startsWith("3")) {
                         var redirectUrl = response.metaInfo
 
                         if (!redirectUrl.startsWith("gemini://")) {
-                            redirectUrl = "gemini://${URI(url).host}$redirectUrl"
+                            redirectUrl = "gemini://${URI(currUrl).host}$redirectUrl"
                         }
 
                         loadPage(redirectUrl)
@@ -112,7 +113,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
             } catch (e: Exception) {
                 _pageState.value = PageState.Ready
-                Log.e("MainViewModel", "Could not fetch $url", e)
+                Log.e("MainViewModel", "Could not fetch $currUrl", e)
                 val writer = StringWriter()
                 val stream = PrintWriter(writer)
                 e.printStackTrace(stream)
@@ -121,16 +122,48 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun loadRelativePage(url: String) {
-        var theUrl = url
+    fun loadRelativePageToHost(relativeUrl: String) {
+        val uri = URI(currUrl)
 
-        theUrl = if (_currentUrl.value.endsWith("/") && url.startsWith("/")) {
-            "${_currentUrl.value}${url.drop(1)}"
+        val url = StringBuilder().apply {
+            append("gemini://")
+            append(uri.host)
+            if (uri.port != -1) append(uri.port)
+            append(relativeUrl)
+        }.toString()
+
+        this.loadPage(url)
+    }
+
+    fun loadRelativePageToPath(relativeUrl: String) {
+        println("here? $relativeUrl")
+
+        val uri = URI(currUrl)
+
+        val split = uri.path.split("/")
+
+        val path = if (split.last().contains(".")) {
+            split.dropLast(1).joinToString(separator = "/")
         } else {
-            "${_currentUrl.value}$theUrl"
+            uri.path
         }
 
-        this.loadPage(theUrl)
+        val url = StringBuilder().apply {
+            append("gemini://")
+            append(uri.host)
+            if (uri.port != -1) append(uri.port)
+            if (path == null || path.isEmpty()) {
+                append("/")
+            } else {
+                append(path)
+            }
+            if (path != null && path.isNotEmpty() && !path.endsWith("/")) append("/")
+            append(relativeUrl)
+        }.toString()
+
+        println(url)
+
+        this.loadPage(url)
     }
 
     fun refresh() {

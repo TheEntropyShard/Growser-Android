@@ -19,7 +19,7 @@
 package me.theentropyshard.growser
 
 class History {
-    private val urls: ArrayDeque<String> = ArrayDeque()
+    val urls: ArrayDeque<String> = ArrayDeque()
 
     fun visit(url: String) {
         urls.add(url)
@@ -30,11 +30,11 @@ class History {
             return currentUrl
         }
 
-        val last = urls.removeLast()
-
-        if (last == currentUrl && urls.size > 0) {
-            return urls.removeLast()
+        if (urls.size == 1) {
+            return urls.last()
         }
+
+        val last = urls.removeLast()
 
         return last
     }
