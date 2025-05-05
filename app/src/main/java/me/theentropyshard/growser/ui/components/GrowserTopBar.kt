@@ -21,9 +21,11 @@ package me.theentropyshard.growser.ui.components
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
@@ -148,12 +150,10 @@ fun GrowserTopBar(
         DropdownMenu(
             expanded = menuShown,
             onDismissRequest = { menuShown = false },
-            offset = DpOffset(offsetX, 0.dp),
-            modifier = Modifier
-                .padding(end = 50.dp)
-                .onPlaced {
-                    offsetX = with(density) { (parentWidth - it.size.width).toDp() }
-                }
+            offset = DpOffset(offsetX - 8.dp, 8.dp),
+            modifier = Modifier.width(175.dp).onPlaced {
+                offsetX = with(density) { (parentWidth - it.size.width).toDp() }
+            }
         ) {
             DropdownMenuItem(
                 leadingIcon = {
