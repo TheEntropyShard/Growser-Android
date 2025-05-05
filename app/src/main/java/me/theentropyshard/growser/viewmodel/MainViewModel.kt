@@ -67,6 +67,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun loadPage(url: String, addToHistory: Boolean = true) {
+        if (url.trim().isEmpty()) {
+            return
+        }
+
         currUrl = if (!url.startsWith("gemini://")) {
             "gemini://$url"
         } else {
