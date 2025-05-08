@@ -192,6 +192,7 @@ fun GrowserTopBar(
                     Text("Save Page")
                 },
                 onClick = {
+                    menuShown = false
                     onMenuItemClick(MenuButton.SavePage)
                 }
             )
