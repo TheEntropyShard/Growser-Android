@@ -20,8 +20,10 @@ package me.theentropyshard.growser.viewmodel
 
 import android.app.Application
 import android.content.ContentResolver
+import android.content.Context
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -33,9 +35,11 @@ import me.theentropyshard.growser.History
 import me.theentropyshard.growser.gemini.GeminiFetch
 import me.theentropyshard.growser.gemini.text.GemtextParser
 import me.theentropyshard.growser.gemini.text.document.GemtextPage
+import java.io.OutputStreamWriter
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.net.URI
+import java.nio.charset.StandardCharsets
 
 enum class PageState {
     NotReady, Loading, Ready
@@ -50,6 +54,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private var _document = MutableStateFlow(GemtextPage("", listOf()))
     val document = _document.asStateFlow()
+
+    private var _currentPageText = MutableStateFlow("")
+    val currentPageText = _currentPageText.asStateFlow()
 
     private var _statusCode = MutableStateFlow(0)
     val statusCode = _statusCode.asStateFlow()
@@ -138,6 +145,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _statusCode.value = statusCode
         _statusLine.value = metaInfo
 
+        _currentPageText.value = gemtext
+
         val page = GemtextParser().parse(gemtext)
 
         _pageState.value = PageState.Ready
@@ -191,5 +200,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun refresh() {
         this.loadPage(_currentUrl.value, false)
+    }
+
+    fun saveCurrentPageTo(context: Context, uri: Uri) {
+        val contentResolver: ContentResolver = context.contentResolver
+        contentResolver.openOutputStream(uri)?.use { outputStream ->
+            OutputStreamWriter(outputStream, StandardCharsets.UTF_8).use { writer ->
+                writer.write(_currentPageText.value)
+            }
+        }
     }
 }

@@ -22,6 +22,8 @@ import android.app.Application
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -56,6 +58,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import me.theentropyshard.growser.MainActivity
 import me.theentropyshard.growser.ui.components.GrowserTopBar
+import me.theentropyshard.growser.ui.components.MenuButton
 import me.theentropyshard.growser.ui.gemini.ExceptionView
 import me.theentropyshard.growser.ui.gemini.GemtextView
 import me.theentropyshard.growser.ui.gemini.PermanentFailure
@@ -81,6 +84,7 @@ fun Growser(uri: Uri? = null) {
     val pageState by mainViewModel.pageState.collectAsState()
     val currentUrl by mainViewModel.currentUrl.collectAsState()
     val page by mainViewModel.document.collectAsState()
+    val currentPageText by mainViewModel.currentPageText.collectAsState()
 
     val statusCode by mainViewModel.statusCode.collectAsState()
     val statusLine by mainViewModel.statusLine.collectAsState()
@@ -100,6 +104,15 @@ fun Growser(uri: Uri? = null) {
     }
 
     val state = remember(currentUrl) { TextFieldState(initialText = currentUrl) }
+
+    val saveFileLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("text/gemini"),
+        onResult = { selectedUri ->
+            selectedUri?.let {
+                mainViewModel.saveCurrentPageTo(context, it)
+            }
+        }
+    )
 
     Scaffold(
         modifier = Modifier
@@ -164,10 +177,38 @@ fun Growser(uri: Uri? = null) {
                             onRefreshClick = {
                                 mainViewModel.refresh()
                             },
-                            onMenuItemClick = { itemIndex ->
-                                when (itemIndex) {
-                                    4 -> {
+                            onMenuItemClick = { button ->
+                                when (button) {
+                                    MenuButton.NewTab -> {
+
+                                    }
+
+                                    MenuButton.SavePage -> {
+                                        if (currentPageText.isEmpty()) {
+                                            Toast.makeText(context, "Current page is empty!", Toast.LENGTH_SHORT).show()
+                                        } else {
+                                            saveFileLauncher.launch("${page.title}.gmi")
+                                        }
+                                    }
+
+                                    MenuButton.History -> {
+
+                                    }
+
+                                    MenuButton.Downloads -> {
+
+                                    }
+
+                                    MenuButton.Bookmarks -> {
+
+                                    }
+
+                                    MenuButton.Settings -> {
                                         navController.navigate("settings")
+                                    }
+
+                                    MenuButton.About -> {
+
                                     }
                                 }
                             }

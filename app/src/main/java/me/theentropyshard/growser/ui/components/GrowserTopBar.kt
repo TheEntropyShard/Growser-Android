@@ -37,6 +37,7 @@ import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -61,6 +62,16 @@ import androidx.compose.ui.unit.dp
 
 val GrowserTopBarHeight = 54.dp
 
+enum class MenuButton {
+    NewTab,
+    SavePage,
+    History,
+    Downloads,
+    Bookmarks,
+    Settings,
+    About
+}
+
 @Composable
 fun GrowserTopBar(
     modifier: Modifier = Modifier,
@@ -69,7 +80,7 @@ fun GrowserTopBar(
     onSearch: (String) -> Unit = {},
     onHomeClick: () -> Unit = {},
     onRefreshClick: () -> Unit = {},
-    onMenuItemClick: (Int) -> Unit = {}
+    onMenuItemClick: (MenuButton) -> Unit = {}
 ) {
     val density = LocalDensity.current
 
@@ -167,6 +178,21 @@ fun GrowserTopBar(
                 },
                 onClick = {
                     menuShown = false
+                    onMenuItemClick(MenuButton.NewTab)
+                }
+            )
+            DropdownMenuItem(
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Outlined.Save,
+                        contentDescription = ""
+                    )
+                },
+                text = {
+                    Text("Save Page")
+                },
+                onClick = {
+                    onMenuItemClick(MenuButton.SavePage)
                 }
             )
             DropdownMenuItem(
@@ -181,7 +207,7 @@ fun GrowserTopBar(
                 },
                 onClick = {
                     menuShown = false
-                    onMenuItemClick(1)
+                    onMenuItemClick(MenuButton.History)
                 }
             )
             DropdownMenuItem(
@@ -196,7 +222,7 @@ fun GrowserTopBar(
                 },
                 onClick = {
                     menuShown = false
-                    onMenuItemClick(2)
+                    onMenuItemClick(MenuButton.Downloads)
                 }
             )
             DropdownMenuItem(
@@ -211,7 +237,7 @@ fun GrowserTopBar(
                 },
                 onClick = {
                     menuShown = false
-                    onMenuItemClick(3)
+                    onMenuItemClick(MenuButton.Bookmarks)
                 }
             )
             DropdownMenuItem(
@@ -226,7 +252,7 @@ fun GrowserTopBar(
                 },
                 onClick = {
                     menuShown = false
-                    onMenuItemClick(4)
+                    onMenuItemClick(MenuButton.Settings)
                 }
             )
             DropdownMenuItem(
@@ -241,7 +267,7 @@ fun GrowserTopBar(
                 },
                 onClick = {
                     menuShown = false
-                    onMenuItemClick(5)
+                    onMenuItemClick(MenuButton.About)
                 }
             )
         }
