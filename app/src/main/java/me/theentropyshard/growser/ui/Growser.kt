@@ -18,6 +18,9 @@
 
 package me.theentropyshard.growser.ui
 
+import android.app.Application
+import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -38,17 +41,20 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import me.theentropyshard.growser.MainActivity
 import me.theentropyshard.growser.ui.components.GrowserTopBar
 import me.theentropyshard.growser.ui.gemini.ExceptionView
 import me.theentropyshard.growser.ui.gemini.GemtextView
@@ -57,13 +63,18 @@ import me.theentropyshard.growser.ui.gemini.TemporaryFailure
 import me.theentropyshard.growser.ui.screen.AppearanceSettingsScreen
 import me.theentropyshard.growser.ui.screen.SettingsScreen
 import me.theentropyshard.growser.viewmodel.MainViewModel
+import me.theentropyshard.growser.viewmodel.MainViewModelFactory
 import me.theentropyshard.growser.viewmodel.PageState
 
 @Composable
-fun Growser() {
+fun Growser(uri: Uri? = null) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    val mainViewModel: MainViewModel = viewModel()
+    val context = LocalContext.current
+    val mainViewModel: MainViewModel = viewModel(factory = MainViewModelFactory(
+        application = context.applicationContext as Application,
+        uri = uri
+    ))
 
     val exception by mainViewModel.exception.collectAsState()
 
@@ -78,6 +89,14 @@ fun Growser() {
 
     BackHandler {
         mainViewModel.loadPreviousPage()
+    }
+
+    LaunchedEffect(Unit) {
+        Toast.makeText(context, "Loading", Toast.LENGTH_SHORT).show()
+        if (MainActivity.firstUri.isNotEmpty()) {
+            mainViewModel.loadPage(MainActivity.firstUri)
+            MainActivity.firstUri = ""
+        }
     }
 
     val state = remember(currentUrl) { TextFieldState(initialText = currentUrl) }

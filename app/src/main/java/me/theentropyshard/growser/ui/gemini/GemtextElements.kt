@@ -57,6 +57,7 @@ import me.theentropyshard.growser.gemini.text.document.GemtextH2Element
 import me.theentropyshard.growser.gemini.text.document.GemtextH3Element
 import me.theentropyshard.growser.gemini.text.document.GemtextHeaderElement
 import me.theentropyshard.growser.ui.theme.jetbrainsMonoFamily
+import java.net.URI
 
 @Composable
 fun GemtextHeader(
@@ -119,6 +120,11 @@ fun GemtextParagraph(
     )
 }
 
+val regularUriSchemes = arrayOf(
+    "http", "https", "file", "ftp", "mailto", "tel",
+    "imap", "irc", "nntp", "acap", "icap", "mtqp", "wss"
+)
+
 @Composable
 fun GemtextLink(
     modifier: Modifier = Modifier,
@@ -133,7 +139,9 @@ fun GemtextLink(
             LinkAnnotation.Url(
                 url = url,
                 linkInteractionListener = {
-                    if (url.startsWith("http://") || url.startsWith("https://")) {
+                    val scheme = URI(url).scheme
+
+                    if (scheme != null && scheme in regularUriSchemes) {
                         defaultUriHandler.openUri(url)
                     } else {
                         onClick(url)
@@ -255,7 +263,9 @@ fun GemtextBlockquote(
             Spacer(modifier = Modifier.width(4.dp))
 
             Text(
-                modifier = Modifier.fillMaxWidth().padding(end = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 8.dp),
                 text = text,
                 textAlign = TextAlign.Justify,
             )

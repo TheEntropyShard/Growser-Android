@@ -19,9 +19,11 @@
 package me.theentropyshard.growser.viewmodel
 
 import android.app.Application
+import android.content.ContentResolver
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -61,6 +63,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val history = History()
 
     private var currUrl: String = ""
+
+    constructor(application: Application, uri: Uri? = null) : this(application) {
+        if (uri != null) {
+            if (uri.scheme == "gemini") {
+                loadPage(uri.toString())
+            } else if (uri.scheme == "content") {
+                application.contentResolver.openInputStream(uri).use {
+                    it?.bufferedReader()?.readText()?.let { text ->
+                        setData(20, "text/gemini", text)
+                    }
+                }
+            }
+        }
+    }
 
     fun loadPreviousPage() {
         this.loadPage(history.pop(this.currentUrl.value), false)
@@ -105,15 +121,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         return@launch
                     }
 
-                    _statusCode.value = response.statusCode
-                    _statusLine.value = response.metaInfo
-
-                    val text = response.readToString()
-                    val page = GemtextParser().parse(text)
-
-                    _pageState.value = PageState.Ready
-
-                    _document.value = page
+                    setData(response.statusCode, response.metaInfo, response.readToString())
                 }
             } catch (e: Exception) {
                 _pageState.value = PageState.Ready
@@ -124,6 +132,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 _exception.value = writer.toString()
             }
         }
+    }
+
+    private fun setData(statusCode: Int, metaInfo: String, gemtext: String) {
+        _statusCode.value = statusCode
+        _statusLine.value = metaInfo
+
+        val page = GemtextParser().parse(gemtext)
+
+        _pageState.value = PageState.Ready
+
+        _document.value = page
     }
 
     fun loadRelativePageToHost(relativeUrl: String) {
