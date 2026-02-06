@@ -96,7 +96,6 @@ fun Growser(uri: Uri? = null) {
     }
 
     LaunchedEffect(Unit) {
-        Toast.makeText(context, "Loading", Toast.LENGTH_SHORT).show()
         if (MainActivity.firstUri.isNotEmpty()) {
             mainViewModel.loadPage(MainActivity.firstUri)
             MainActivity.firstUri = ""
