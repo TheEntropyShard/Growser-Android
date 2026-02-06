@@ -18,24 +18,42 @@
 
 package me.theentropyshard.growser
 
+import java.util.ArrayDeque
+
 class History {
-    val urls: ArrayDeque<String> = ArrayDeque()
+    private val backStack = ArrayDeque<String>()
+    private val forwardStack = ArrayDeque<String>()
 
-    fun visit(url: String) {
-        urls.add(url)
-    }
+    private var currentUri: String = ""
 
-    fun pop(currentUrl: String): String {
-        if (urls.size == 0) {
-            return currentUrl
+    fun visit(uri: String) {
+        if (currentUri != "") {
+            backStack.push(currentUri)
         }
 
-        if (urls.size == 1) {
-            return urls.last()
+        currentUri = uri
+        forwardStack.clear()
+    }
+
+    fun back(): String {
+        if (canNavigateBack()) {
+            forwardStack.push(currentUri)
+            currentUri = backStack.pop()
         }
 
-        val last = urls.removeLast()
-
-        return last
+        return currentUri
     }
+
+    fun forward(): String {
+        if (canNavigateForward()) {
+            backStack.push(currentUri)
+            currentUri = forwardStack.pop()
+        }
+
+        return currentUri
+    }
+
+    fun canNavigateBack() = backStack.isNotEmpty()
+
+    fun canNavigateForward() = forwardStack.isNotEmpty()
 }

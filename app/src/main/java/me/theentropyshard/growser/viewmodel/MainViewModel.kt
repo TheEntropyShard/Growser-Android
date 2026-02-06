@@ -86,7 +86,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun loadPreviousPage() {
-        this.loadPage(history.pop(this.currentUrl.value), false)
+        this.loadPage(history.back(), false)
     }
 
     fun loadPage(url: String, addToHistory: Boolean = true) {
