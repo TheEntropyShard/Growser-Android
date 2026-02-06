@@ -19,6 +19,7 @@
 package me.theentropyshard.growser.ui.components
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,16 +29,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.AddBox
 import androidx.compose.material.icons.outlined.DownloadDone
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Save
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -76,9 +82,14 @@ enum class MenuButton {
 fun GrowserTopBar(
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
+    bookmarked: Boolean,
     state: TextFieldState,
     onSearch: (String) -> Unit = {},
     onHomeClick: () -> Unit = {},
+    canNavigateForward: Boolean,
+    onNavigateForward: () -> Unit,
+    onClickBookmark: () -> Unit,
+    onClickPageInfo: () -> Unit,
     onRefreshClick: () -> Unit = {},
     onMenuItemClick: (MenuButton) -> Unit = {}
 ) {
@@ -141,13 +152,6 @@ fun GrowserTopBar(
                 onSearch = onSearch
             )
 
-            IconButton(onClick = onRefreshClick) {
-                Icon(
-                    imageVector = Icons.Outlined.Refresh,
-                    contentDescription = ""
-                )
-            }
-
             IconButton(onClick = {
                 menuShown = true
             }) {
@@ -162,10 +166,21 @@ fun GrowserTopBar(
             expanded = menuShown,
             onDismissRequest = { menuShown = false },
             offset = DpOffset(offsetX - 8.dp, 8.dp),
-            modifier = Modifier.width(175.dp).onPlaced {
+            modifier = Modifier.onPlaced {
                 offsetX = with(density) { (parentWidth - it.size.width).toDp() }
             }
         ) {
+            TopMenuBar(
+                canNavigateForward = canNavigateForward,
+                onNavigateForward = onNavigateForward,
+                bookmarked = bookmarked,
+                onClickBookmark = onClickBookmark,
+                onClickPageInfo = onClickPageInfo,
+                onClickRefresh = onRefreshClick
+            ) {
+                menuShown = false
+            }
+
             DropdownMenuItem(
                 leadingIcon = {
                     Icon(
@@ -270,6 +285,73 @@ fun GrowserTopBar(
                     menuShown = false
                     onMenuItemClick(MenuButton.About)
                 }
+            )
+        }
+    }
+}
+
+@Composable
+private fun TopMenuBar(
+    modifier: Modifier = Modifier,
+    canNavigateForward: Boolean,
+    onNavigateForward: () -> Unit,
+    bookmarked: Boolean,
+    onClickBookmark: () -> Unit,
+    onClickPageInfo: () -> Unit,
+    onClickRefresh: () -> Unit,
+    onActionTaken: () -> Unit
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(
+            onClick = {
+                onNavigateForward()
+                onActionTaken()
+            },
+            enabled = canNavigateForward
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = "Navigate forward"
+            )
+        }
+
+        IconButton(
+            onClick = {
+                onClickBookmark()
+                onActionTaken()
+            }
+        ) {
+            Icon(
+                imageVector = if (bookmarked) Icons.Outlined.Star else Icons.Outlined.StarOutline,
+                contentDescription = if (bookmarked) "Remove bookmark" else "Add bookmark"
+            )
+        }
+
+        IconButton(
+            onClick = {
+                onClickPageInfo()
+                onActionTaken()
+            }
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Info,
+                contentDescription = "Page info"
+            )
+        }
+
+        IconButton(
+            onClick = {
+                onClickRefresh()
+                onActionTaken()
+            }
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Refresh,
+                contentDescription = "Refresh page"
             )
         }
     }

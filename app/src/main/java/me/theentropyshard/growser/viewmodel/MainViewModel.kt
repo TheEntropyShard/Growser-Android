@@ -67,7 +67,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var _exception = MutableStateFlow("")
     val exception = _exception.asStateFlow()
 
-    private val history = History()
+    val history = History()
 
     private var currUrl: String = ""
 
@@ -87,6 +87,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun loadPreviousPage() {
         this.loadPage(history.back(), false)
+    }
+
+    fun loadNextPage() {
+        this.loadPage(history.forward(), false)
     }
 
     fun loadPage(url: String, addToHistory: Boolean = true) {

@@ -74,30 +74,30 @@ fun Growser(uri: Uri? = null) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
     val context = LocalContext.current
-    val mainViewModel: MainViewModel = viewModel(factory = MainViewModelFactory(
+    val model: MainViewModel = viewModel(factory = MainViewModelFactory(
         application = context.applicationContext as Application,
         uri = uri
     ))
 
-    val exception by mainViewModel.exception.collectAsState()
+    val exception by model.exception.collectAsState()
 
-    val pageState by mainViewModel.pageState.collectAsState()
-    val currentUrl by mainViewModel.currentUrl.collectAsState()
-    val page by mainViewModel.document.collectAsState()
-    val currentPageText by mainViewModel.currentPageText.collectAsState()
+    val pageState by model.pageState.collectAsState()
+    val currentUrl by model.currentUrl.collectAsState()
+    val page by model.document.collectAsState()
+    val currentPageText by model.currentPageText.collectAsState()
 
-    val statusCode by mainViewModel.statusCode.collectAsState()
-    val statusLine by mainViewModel.statusLine.collectAsState()
+    val statusCode by model.statusCode.collectAsState()
+    val statusLine by model.statusLine.collectAsState()
 
     val navController = rememberNavController()
 
     BackHandler {
-        mainViewModel.loadPreviousPage()
+        model.loadPreviousPage()
     }
 
     LaunchedEffect(Unit) {
         if (MainActivity.firstUri.isNotEmpty()) {
-            mainViewModel.loadPage(MainActivity.firstUri)
+            model.loadPage(MainActivity.firstUri)
             MainActivity.firstUri = ""
         }
     }
@@ -108,7 +108,7 @@ fun Growser(uri: Uri? = null) {
         contract = ActivityResultContracts.CreateDocument("text/gemini"),
         onResult = { selectedUri ->
             selectedUri?.let {
-                mainViewModel.saveCurrentPageTo(context, it)
+                model.saveCurrentPageTo(context, it)
             }
         }
     )
@@ -168,13 +168,13 @@ fun Growser(uri: Uri? = null) {
                             state = state,
                             onSearch = {
                                 keyboardController?.hide()
-                                mainViewModel.loadPage(it)
+                                model.loadPage(it)
                             },
                             onHomeClick = {
-                                mainViewModel.loadPage("geminiprotocol.net")
+                                model.loadPage("geminiprotocol.net")
                             },
                             onRefreshClick = {
-                                mainViewModel.refresh()
+                                model.refresh()
                             },
                             onMenuItemClick = { button ->
                                 when (button) {
@@ -210,7 +210,12 @@ fun Growser(uri: Uri? = null) {
 
                                     }
                                 }
-                            }
+                            },
+                            bookmarked = false,
+                            onClickBookmark = {},
+                            onClickPageInfo = {},
+                            canNavigateForward = model.history.canNavigateForward(),
+                            onNavigateForward = { model.loadNextPage() }
                         )
                         if (pageState == PageState.Ready) {
                             val digit = statusCode / 10
@@ -237,12 +242,12 @@ fun Growser(uri: Uri? = null) {
                                                 scrollState = scrollState,
                                                 onUrlClick = {
                                                     if (it.startsWith("gemini://")) {
-                                                        mainViewModel.loadPage(it)
+                                                        model.loadPage(it)
                                                     } else {
                                                         if (it.startsWith("/")) {
-                                                            mainViewModel.loadRelativePageToHost(it)
+                                                            model.loadRelativePageToHost(it)
                                                         } else {
-                                                            mainViewModel.loadRelativePageToPath(it)
+                                                            model.loadRelativePageToPath(it)
                                                         }
                                                     }
                                                 }
